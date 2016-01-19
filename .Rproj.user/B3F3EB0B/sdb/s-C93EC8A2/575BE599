@@ -1,0 +1,17 @@
+{
+    "contents" : "##Homeownership functions\n#average Black homeownership rate by year\ncalc_black_rate <- function() {\n  average_black_rate = c()\n  for (i in 1994:2014) {\n    black_rate_total = 0\n    count = 0\n    curr_year_black = home_rates$Black[home_rates$Year == i]\n    for (i in 1:length(curr_year_black)) {\n      black_rate_total = black_rate_total + as.numeric(as.character(curr_year_black[i]))\n      count = count + 1\n    }\n    average_black_rate = c(average_black_rate, black_rate_total/count)\n  }\n  return (average_black_rate)\n}\ncalc_white_rate <- function(){\n  average_white_rate = c()\n  for (i in 1994:2014) {\n    white_rate_total = 0\n    count = 0\n    curr_year_white = home_rates$White[home_rates$Year == i]\n    for (i in 1:length(curr_year_white)) {\n      white_rate_total = white_rate_total + as.numeric(as.character(curr_year_white[i]))\n      count = count + 1\n    }\n    average_white_rate = c(average_white_rate, white_rate_total/count)\n  }\n  return (average_white_rate)\n}\n\ncalc_hispanic_rate <- function(){\n  average_hispanic_rate = c()\n  for (i in 1994:2014) {\n    hispanic_rate_total = 0\n    count = 0\n    curr_year_hispanic = home_rates$Hispanic[home_rates$Year == i]\n    for (i in 1:length(curr_year_hispanic)) {\n      hispanic_rate_total = hispanic_rate_total + as.numeric(as.character(curr_year_hispanic[i]))\n      count = count + 1\n    }\n    average_hispanic_rate = c(average_hispanic_rate, hispanic_rate_total/count)\n  }\n  return (average_hispanic_rate)\n}\n\ncalc_other_rate <- function(){\n  average_other_rate = c()\n  for (i in 1994:2014) {\n    other_rate_total = 0\n    count = 0\n    curr_year_other = home_rates$Other[home_rates$Year == i]\n    for (i in 1:length(curr_year_other)) {\n      other_rate_total = other_rate_total + as.numeric(as.character(curr_year_other[i]))\n      count = count + 1\n    }\n    average_other_rate = c(average_other_rate, other_rate_total/count)\n  }\n  return (average_other_rate)\n}\n\ncalc_US_rate <- function(){\n  average_US_rate = c()\n  for (i in 1994:2014) {\n    US_rate_total = 0\n    count = 0\n    curr_year_US = home_rates$`US Total`[home_rates$Year == i]\n    for (i in 1:length(curr_year_US)) {\n      US_rate_total = US_rate_total + as.numeric(as.character(curr_year_US[i]))\n      count = count + 1\n    }\n    average_US_rate = c(average_US_rate, US_rate_total/count)\n  }\n  return (average_US_rate)\n}\n\n\n#function that calculates the difference in homeownership rates between the US total\n#and a minority group \ncalc_diff <- function(us_total, subgroup) {\n  difference = us_total - subgroup\n  return(difference)\n}\n\n",
+    "created" : 1450155344095.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2942829618",
+    "id" : "575BE599",
+    "lastKnownWriteTime" : 1450140495,
+    "path" : "~/SCHOOL/Fall 2015/STATS 133 - COMPUTING W DATA/133 R wd/Final/code/homeownership_functions.R",
+    "project_path" : "code/homeownership_functions.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

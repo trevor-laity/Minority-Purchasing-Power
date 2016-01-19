@@ -1,0 +1,692 @@
+---
+title: "An Analysis of Purchasing Power for Minority Groups in the US from 1994 to 2004"
+author: "Sonalika Reddi, Sonia Sharma, Katie Hitchcock, & Trevor Laity"
+date: "December 14, 2015"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+---
+
+**Introduction:**
+The U.S. Census Bureau has projected that by 2044, more than half of all Americans will belong to a minority group, defined as any other group than "non-Hispanic white" (https://www.census.gov/content/dam/Census/library/publications/2015/demo/p25-1143.pdf). This statistic indicates that there has and continues to be significant growth of the population sizes of minority groups in the U.S. Considering this rapid and substantial growth in the size of minority populations, it would be interesting to analyze the nature of the economic growth corellated with the growth of select minority groups. 
+
+We chose to look at this growth through the lens of "buying" and "spending" power for minority groups in the U.S. We defined this trend through various variables: homeownership rates, average after-tax income levels, average expenditure levels, and the breakdown of spending on different goods. Each variable provides an interesting insight into how much minority groups are earning after taxes, and how exactly they are spending in the U.S. For example, homeownership rates provide insight into whether certain groups are engaging in the housing market and therefore diverting larger portions of their wealth into long-term investments such as homeownership. 
+
+We first extracted rates of homeownership from the U.S. Census Bureau website (http://www.census.gov/housing/hvs/data/histtabs.html) from 1994 to 2014. We then analyze the rates over this time period through different demographic lenses and compared these rates between the different subgroups. The subgroups provided in the dataset that we examined are: "Hispanic (of any race)", "All Other Races", "Black Alone", "Non-Hispanic White Alone", and "US." We then extracted data from the "Consumer Expenditure Survey" provided by the Bureau of Labor Statistics (http://www.bls.gov/cex/csxstnd.htm). The survey data is organized by various demographic characteristics. We chose to select the data organized by the "Race of reference person" to evaluate the data by different races. Next, we examined key economic factors by race: income after taxes, average annual expenditures, and expenditures on various items (food, alcoholic beverages, housing, apparel, transportation, healthcare, entertainment, personal care products and services, reading, education, tobacco products and smoking supplies, miscellaneous foods, cash contributions, and personal insurance and pensions). Examining spending on these various items shows how the composition of spending has or has not changed within a given time period. A slight shift towards nonessential goods would indicate an increase in discretionary spending, which could be associated with a increasing in purchasing power for that group in a particular time period. 
+
+After extracting the data, we examined income, expenditures, homeownership rates, and the composition of expenditures for trends over time and compared the trends between each minority subgroup and the US total. Our examination of these variables will then give us insight into the nature of the "buying/spending power" for minority subgroups over a given period.
+
+**Data Extraction and Cleanup:**
+
+We primarily extracted our data from two main sources. We obtained our Homeownership Rate data set from the U.S. Census Bureau. The Bureau provided various datasets on homeownership and housing vacancies, but we focused on the data in "Table 16" on Quarterly Homeownership Rates by Race and Ethnicity of Householder from 1994 to Present. The website provided excel spreadsheets which we saved as csvs. Our other data sets were from the Bureau of Labor Statistics. The Bureau of Labor Statistics had expenditure tables for the years 1960-2011. Since we wanted our data sets to be in TXT format, we chose to analyze the only years in that format: 1994-2004. We then downloaded the expenditure tables from those 10 years that were split up by the "Race of the reference person." We chose to download our Homeownership Rate data set from the U.S. Census Bureau because it formatted Homeownership rates by race, quarter, and year. Therefore the simple format and the abundance of information pushed us to choose this data set.
+
+We began by renaming the columns from labels such as "V1" to data-appropriate labels such as "Year and Quarter" and "US Total." Next, we removed extraneous columns by making them NULL. Unfortunately, the data set came with a long header, long footnote, and blank lines after each year. We proceeded to further clean this data by removing the header and the footer. Then we moved on to removing the unnecessary blank lines in between the years by calling the function "is.na." Our first column, "Year and Quarter" contained a repeating sequence of 5 rows. The first row would state the year and the second to fifth row would state the quarter. We created a vector which was a sequence of the indexes of the lines that said the year. We used that vector to extract the rest of the years. Our team decided we wanted to split the column "Year and Quarter" into two columns with one stating the year and the other stating the quarter.  We used "rep" to create a sequence of years that be then turned into another column.We then used str-extract to extract the quarter names and put them in their own column. Finally, we re-ordered the columns to move "Year" and "Quarter" to the left-hand side of the dataset and repositioned "Other" to be the last demographic column yielding a clean data set without a header, footer, blank lines, or excess columns.
+
+We obtained income and expenditure data from the Bureau of Labor Statistics (BLS). Their annual Consumer Expenditure Survey provides data on the average total and breakdown of yearly spending of a sample of American families. This data is available to the public as a list of data tables, sorted by different demographic aspects of the reference family unit, among them race, education, income, and housing tenure. Of our selected years, the expenditure data for 1996-2002 was contained in the same report as expenditure data as sorted by housing tenure. 2003 and 2004's data by race was contained in their own text files.
+
+We wrote an abstract function to extract relevant data from the expenditure text files made of several helper functions. One helper function read the text file (formatted as a fixed-width file) into a dataframe with a specified object name. Another helper function cleaned the data by removing whitespace and extraneous symbols. The helper function removed the text file's informational header and footer, converted negative numbers into the standard notation with a minus sign, converted the first row of the fixed-width file into the dataframe's row names and removed it from the dataframe, selected specified relevant rows of data by rowname, and coerced the resulting units of the dataframe from characters into numeric values.An error we encountered while running the helper function were NA values imbedded in the dataset. Our solution was replace NAs with zeros in order to maintain all the values and keep the rows intact. An abstract master function handled changing the NAs and called the helper functions to pull a text file from the BLS website to return a cleaned, named dataframe (with any missing values replaced by zeroes). The required arguments for the master function are: the year, the widths of each column of the fixed-width text file, the length of the header in number of rows, and the row number at which the footer started. To apply this function to the text files of 1996-2004 whose formatting all varied--from URL name to column width to delimiter to column and row names--we had to create a list for each year made of the corresponding column widths vector, header length, and footer row and write some logic gates in the helper and master functions to paste and get the corresponding URLs and dataframe names, select which rows and columns were relevant and which were extraneous, and which list to select. With a loop through the values 1994-2004 to provide the reference for the function's year parameter, this flexible, abstracted group of functions creates, populates, and defines ten cleaned data frames of identical dimensions from the BLS expenditure reports.
+
+**Homeownership Rates:**
+
+Our data set from the U.S. Census Bureau provided data on homeownership rates, which is the percentage of homes occupied by their owners, and is therefore a strong economic indicator of spending and buying power for minority groups. Analysis of this data helps to address some interesting questions in relation to spending for minority groups. Have minority groups been placing more of their wealth in the housing market? Are minority groups buying more homes now than 20 years ago? Are minority groups all following the same trend in terms of homeownership, or is there one subgroup that exhibit larger rates?
+
+We first examined the trend in homeownership rates for all the racial subgroups provided in the dataset  (White, Other, Hispanic, and Black) against the US Total average. We did this by first calculating the average over each of the four quarters to calculate a singular value for each of the years from 1994 to 2002 (BLS data for 2003 and 2004 stopped specifying data for Hispanic families in the Race table, replacing it with data for Asian families). A sample of our function that we used to calculate average Hispanic homeownership rates can be seen below, and we reproduced it for each of the different racial subgroups to calculate their respective averages.
+
+```{r, echo = F}
+home_rates <- read.csv("../rawdata/homeownership_rates_csv.csv", header=FALSE)
+data.frame(home_rates)
+
+#re-name columns 
+library("stringr")
+library(plyr)
+names(home_rates)[names(home_rates)=="V1"] <- "Year and Quarter"
+names(home_rates)[names(home_rates)=="V2"] <- "US Total"
+names(home_rates)[names(home_rates)=="V3"] <- "White"
+names(home_rates)[names(home_rates)=="V4"] <- "Black"
+names(home_rates)[names(home_rates)=="V5"] <- "Other"
+names(home_rates)[names(home_rates)=="V6"] <- "Hispanic"
+
+#remove unnecessary columns after "Hispanic" with "NA"s
+home_rates$V7 <- NULL
+home_rates$V8 <- NULL
+home_rates$V9 <- NULL
+home_rates$V10 <- NULL
+home_rates$V11 <- NULL
+home_rates$V12 <- NULL
+
+#remove unnecessary rows in header and footer along 
+# with data for 2015 due to incomplete data
+#(missing data for fourth quarter)
+home_rates <- home_rates[-c(134:155),]
+
+home_rates <- home_rates[-c(1:8),]
+
+#remove empty rows in between data for each year
+home_rates <- home_rates[!apply(is.na(home_rates) | 
+                                  home_rates == "", 1, all), ]
+
+#make new column for year to have separate columns for year and quarter
+home_rates$Year <- rep(1994:2014, each = 5)
+
+#remove 'nth' rows that contain the years, under "Year and Quarter" 
+index <- seq(1, nrow(home_rates), by=5)
+home_rates <- home_rates[-index,]
+
+#remove "Year and Quarter" column and make "Quarter" column
+home_rates$Quarter <- str_extract(home_rates$`Year and Quarter`, 
+                                  pattern = "^[1-4]")
+home_rates$`Year and Quarter` <- NULL
+
+#re-order columns to move "Year" and "Quarter" and "Other" columns to conclude cleaning
+home_rates <- home_rates[,c("Year", "Quarter", "US Total", "White", 
+                            "Black", "Hispanic", "Other")]
+#average Black homeownership rate by year
+calc_black_rate <- function() {
+  average_black_rate = c()
+  for (i in 1994:2014) {
+    black_rate_total = 0
+    count = 0
+    curr_year_black = home_rates$Black[home_rates$Year == i]
+    for (i in 1:length(curr_year_black)) {
+      black_rate_total = black_rate_total + as.numeric(as.character(curr_year_black[i]))
+      count = count + 1
+    }
+    average_black_rate = c(average_black_rate, black_rate_total/count)
+  }
+  return (average_black_rate)
+}
+calc_white_rate <- function(){
+  average_white_rate = c()
+  for (i in 1994:2014) {
+    white_rate_total = 0
+    count = 0
+    curr_year_white = home_rates$White[home_rates$Year == i]
+    for (i in 1:length(curr_year_white)) {
+      white_rate_total = white_rate_total + as.numeric(as.character(curr_year_white[i]))
+      count = count + 1
+    }
+    average_white_rate = c(average_white_rate, white_rate_total/count)
+  }
+  return (average_white_rate)
+}
+
+calc_hispanic_rate <- function(){
+  average_hispanic_rate = c()
+  for (i in 1994:2014) {
+    hispanic_rate_total = 0
+    count = 0
+    curr_year_hispanic = home_rates$Hispanic[home_rates$Year == i]
+    for (i in 1:length(curr_year_hispanic)) {
+      hispanic_rate_total = hispanic_rate_total + as.numeric(as.character(curr_year_hispanic[i]))
+      count = count + 1
+    }
+    average_hispanic_rate = c(average_hispanic_rate, hispanic_rate_total/count)
+  }
+  return (average_hispanic_rate)
+}
+
+calc_other_rate <- function(){
+  average_other_rate = c()
+  for (i in 1994:2014) {
+    other_rate_total = 0
+    count = 0
+    curr_year_other = home_rates$Other[home_rates$Year == i]
+    for (i in 1:length(curr_year_other)) {
+      other_rate_total = other_rate_total + as.numeric(as.character(curr_year_other[i]))
+      count = count + 1
+    }
+    average_other_rate = c(average_other_rate, other_rate_total/count)
+  }
+  return (average_other_rate)
+}
+
+calc_US_rate <- function(){
+  average_US_rate = c()
+  for (i in 1994:2014) {
+    US_rate_total = 0
+    count = 0
+    curr_year_US = home_rates$`US Total`[home_rates$Year == i]
+    for (i in 1:length(curr_year_US)) {
+      US_rate_total = US_rate_total + as.numeric(as.character(curr_year_US[i]))
+      count = count + 1
+    }
+    average_US_rate = c(average_US_rate, US_rate_total/count)
+  }
+  return (average_US_rate)
+}
+calc_US_rate()
+
+
+#function that calculates the difference in homeownership rates between the US total
+#and a minority group 
+calc_diff <- function(us_total, subgroup) {
+  difference = us_total - subgroup
+  return(difference)
+}
+
+average_black_rate <- calc_black_rate()
+
+#average White homeownership rate by year
+average_white_rate <- calc_white_rate()
+
+#average Hispanic homeownership rate by year
+average_hispanic_rate <- calc_hispanic_rate()
+
+#average Other homeownership rate by year
+average_other_rate <- calc_other_rate()
+
+#average total US homeownership rate by year
+average_US_rate <- calc_US_rate()
+
+diff_black <- c()
+for (i in 1994:2014) {
+  result = calc_diff(average_US_rate, average_black_rate)
+}
+diff_black <- c(diff_black, result)
+diff_other <- c()
+for (i in 1994:2014) {
+  result = calc_diff(average_US_rate, average_other_rate)
+}
+diff_other <- c(diff_other, result)
+diff_hisp <- c()
+for (i in 1994:2014) {
+  result = calc_diff(average_US_rate, average_hispanic_rate)
+}
+diff_hisp <- c(diff_hisp, result)
+```
+```{r}
+#create average of homeownership rates of all 
+#quarters to obtain 1 value for each year for all
+#population groups
+
+#average Black homeownership rate by year
+calc_black_rate <- function(){
+  average_black_rate = c()
+  for(i in 1994:2004){
+    black_rate_total = 0
+    count = 0
+    curr_year_black = home_rates$Black[home_rates$Year == i]
+    for (i in 1:length(curr_year_black)) {
+      black_rate_total = black_rate_total + as.numeric(as.character(curr_year_black[i]))
+      count = count + 1
+    }
+    average_black_rate = c(average_black_rate, black_rate_total/count)
+  }
+  return (average_black_rate)
+}
+average_black_rate <- calc_black_rate()
+
+```
+
+After calculating the averages over time for each of the different racial subgroups along with the average for the US Total, we then plotted the averages, as seen below:
+
+```{r, echo=FALSE}
+plot(x = 1994:2014, y = average_US_rate, xlab = "Year", 
+     main = "Average Homeownership Rates: All Groups vs. US Total", 
+     ylab = "Homeownership Rates", xaxt = 'n', lwd = 3, yaxt = 'n', 
+     type = "l", col = "#FF4040", 
+     axes = FALSE, ylim= c(40,80), xlim = c(1994, 2014))
+lines(x = 1994:2014, y = average_hispanic_rate, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#FF7F50")
+#lines(x = 1994:2014, y = average_black_rate,
+#      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#6595ED")
+lines(x = 1994:2014, y = average_other_rate, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#66CD00")
+lines(x = 1994:2014, y = average_white_rate, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#9B009B")
+axis(side = 2, at = c(seq(from = 40, to = 80, by = 5)), las = 1)
+axis(side = 1, at = c(seq(from = 1994, to = 2014, by = 2)), las = 2)
+abline(h = c(seq(from=40,to=80,by=5)), 
+       v = c(seq(from = 1994, to = 2014, by = 2)))
+legend("topright", title = "Homeownership Rates", 
+       col = c("#9B009B", "#FF4040", "#66CD00", "#FF7F50", "#6595ED"), 
+       legend = c("White", "Total US", "Other", "Hispanic", "Black"), 
+       lwd = c(2.5, 2.5), lty = c(1,1), cex = 0.7)
+```
+
+We noticed that generally speaking, the trends were fairly similar for each of the racial subgroups. The homeownership rates for all the subgroups peaked in the period from 2004 to 2006. This visualized trend falls in line with the bubble-like nature of the housing market before the U.S. Financial Crisis.  As seen in the plot, the trend for 'Other' homeownership rates follows a rather different "path" than those of the other subgroups. There is a distinguishable increase in the data between 2004 and 2006, however, given the nature of the way the data has been divided, we are not able to conclude which racial subgroups exactly fall into this category.
+
+Additionally, as shown in the plot, the trends for all subgroups follow a similar pattern amongst each other. For example, White homeownership rates have consistently been greater than the rate of the total US population, which has in turn been greater over time than the rate of the Other population. Additionally, the homeownership rates of all subgroups were increasing for approximately the first 10 years, but began to decrease for the latter half of our time frame. Our data did reveal that in 2005, both Black and Hispanic homeownership were at 49%, and after this crossing point, Black homeownership rates rates began replacing that of the Hispanic population, therefore serving as the lowest rates among all subgroups. This change the in trend is noteworthy, as both minority groups' rates were following a similar upward trend from 1994 to 2005.
+
+Our analysis of averages rates over time did not reveal any noticeable changes in trends in the homeownership rates for the Black and Hispanic population. It is, however, important to notice that consistently after 2005, homeownership rates were greater for the Hispanic population than for the Black population. It prompts us to ask: What happened in 2005?
+
+We then proceeded to closely examine the data by analyzing the nature of the trends for the Black and Hispanic rates in relation to the total US rates. This can help us answer some interesting questions. How are the rates moving in relation to each other? Is there a possibility of convergence in the homeownership rates of minority groups and that of the US population on average? We determined that the best possible way to analyze these questions is by simply looking at the difference between the rate of the total US population and the rate of the Black and Hispanic population.
+
+```{r, echo=FALSE}
+plot.new()
+plot(unique(home_rates$Year), diff_black, main = "Difference in Avg US Homeownership 
+     Rates and Black Homeownership Rates", ylim = c(10,30), type = 'l', lwd = 4, col = "#0000EE",
+     xlab = "Year", ylab = "Homeownership Rates")
+abline(h = c(seq(from=10,to=30,by=5)), v = c(seq(from = 1994, to = 2014, by = 2)))
+```
+
+As seen in the plot above, the difference in average homeownership rates for the total US population and Black population does not change drastically over the time period, and hovers around 21%.
+
+```{r, echo=FALSE}
+plot(unique(home_rates$Year), diff_hisp, main = "Difference in Avg US Homeownership 
+     Rates and Hispanic Homeownership Rates", ylim = c(10,30), type = 'l', lwd = 4, col = "#8B0000",
+     xlab = "Year", ylab = "Homeownership Rates")
+abline(h = c(seq(from=10,to=30,by=5)), v = c(seq(from = 1994, to = 2014, by = 2)))
+```
+
+However, the data exhibits a different trend for the Hispanic population. The difference between the Hispanic homeownership rate and total US rate decreases from 2003 and relatively stabilizes from 2010 onwards around 19%. Within 20 years, homeownership rates for the Hispanic population moved closer to that of the US average, a possible indicator in increased buying power for this subgroup.
+
+```{r, echo=FALSE}
+plot.new()
+plot(unique(home_rates$Year), diff_other, main = "Difference in Avg US Homeownership Rates and 
+     'Other' Homeownership Rates", ylim = c(0,30), type = 'l', lwd = 4, col = "#76EEC6",
+     xlab = "Year", ylab = "Homeownership Rates", las = 1)
+abline(h = c(seq(from=0,to=30,by=5)), v = c(seq(from = 1994, to = 2014, by = 2)))
+```
+
+Additionally, we calculated the difference between the average of total US homeownership rates and those of the 'Other' population. As expected, the difference is very minimal compared to the difference in rates for the Black and Hispanic population. We can see that the difference dipped about 7% since 1994. Although we cannot determine with certainty which races comprise the "Other" group defined by the U.S. Census Bureau, we can assume that it includes several minority groups including those from the South Asian and East Asian populations.
+
+**Income Levels:**
+
+Our data sets from the Bureau of Labor Statistics has dollar values for Income after Taxes. Our group decided that that was a good factor to examine when measuring and analyzing the purchasing power of minorities as it shows how much money is earned.
+
+```{r, echo = F}
+get_info <- function(row_index, new_df){
+  year_count <- 1
+  #go by year
+  for(y in 1994:2002){
+    #year = by dataframe in old sort
+    #get df for specified year
+    currYear <- get(paste0("race_df_", y, sep = ""))
+    #year = by row in new sort; use year count as row count in new sort
+    #traverse by columns = races in both 
+    for(z in 1:length(races)){
+      new_df[year_count, z] <- currYear[row_index, z]
+    }
+    year_count <- year_count + 1
+  }
+  rownames(new_df) <- c(1994:2002)
+  colnames(new_df) <- races
+  new_df
+}
+for(i in 1994:2002){
+  prefix <- "race_df_"
+  file_name <- paste0("../data/",prefix, i, "_cleaned.Rdata", sep = "")
+  df_name <- paste0(prefix, i, sep = "")
+  load(file_name)
+  assign(df_name, df)
+}
+
+####Sort data by individual item: rows = years, columns = races
+races <- c("White", "Black", "Hispanic", "NonHispanic")
+row_indices <- c(Income = 1, Expenditure = 2, 
+                 Food = 3, Alcohol = 4, Apparel = 5,
+                 Housing = 6, Transportation = 7, Health = 8, 
+                 Entertainment = 9, Reading = 11, Miscellaneous = 14,
+                 PersonalInsurance = 16)
+
+#make dfs, then split by race
+
+for(i in 1:length(row_indices)){
+  df <- as.data.frame(matrix(data = 0, nrow = 9, ncol = 4))
+  df <- get_info(row_index = row_indices[i], df)
+  #make individual vectors: spending data for years by race
+  for(j in 1:length(races)){
+    vec <- df[j]
+    #make & assign name to vec
+    name <- paste0(races[j], "_", names(row_indices[i]), sep = "")
+    assign(name, vec)
+  }
+}
+plot.new()
+income_years <- c(1994:2002)
+plot(income_years, t(White_Income), xlab = "Year", main = "Income After Taxes", 
+     ylab = "Income ($)", xaxt = 'n', lwd = 3, yaxt = 'n', 
+     type = "l", col = "#FF7256", axes = FALSE, ylim= c(15000,60000), 
+     xlim = c(1994, 2002))
+lines(income_years, t(Black_Income), xaxt = 'n', yaxt = 'n', 
+      lwd = 3, col = "#76EEC6")
+lines(income_years, t(Hispanic_Income), xaxt = 'n', yaxt = 'n', 
+      lwd = 3, col = "#0000EE")
+lines(income_years, t(`NonHispanic_Income`), xaxt = 'n', yaxt = 'n', 
+      lwd = 3, col = "#BCEE68")
+axis(side = 2, at = c(seq(from = 15000, to = 60000, by = 5000)), las = 1, cex.axis = 0.75)
+axis(side = 1, at = c(seq(from = 1994, to = 2002, by = 2)), las = 1)
+abline(h = c(seq(from=15000,to=60000,by=5000)), 
+       v = c(seq(from = 1994, to = 2002, by = 2)))
+legend("topleft", title = "Subgroups", 
+       col = c("#FF7256", "#BCEE68", "#0000EE", "#76EEC6"), 
+       legend = c("White", "Non-Hispanic", "Hispanic", "Black"), 
+       lwd = c(2.5, 2.5), lty = c(1,1), cex = 0.7)
+
+```
+
+In the graph above, we see each demographic's income rise from 1994 to 2002. This is what we might expect, considering rising inflation and increased general costs over time--but the average income of a white family is still significantly higher than that of the average of any minority.While minorities' incomes are increasing over time, equality is not--there is no ground being made up. The gap still exists and very much persists, according to the data. This discrepancy in income may be an effect of another factor--education, inherited wealth, etc.--but the fact the discrepancy shows no sign of decreasing between 1994 and 2002 is notable indeed. It also appears that BLS included the data for white families in the Non-Hispanics data, as the lines for those two groups are very similar. While there are no remarkable trends that stand out, it is important to note that Hispanics have consistently reported greater earnings than the Black population.
+
+**Expenditure Levels:**
+
+Income is just one measure of financial ability -- wealth and purchasing power reflect a family's income, but also reflect how much they spend. Our data sets from the Bureau of Labor Statistics provided data on the Average Expenditure Levels for different racial subgroups. This is a good factor to examine as it will provide a holistic look into spending overtime.
+
+```{r, echo=FALSE}
+get_info <- function(row_index, new_df){
+  year_count <- 1
+  #go by year
+  for(y in 1994:2002){
+    #year = by dataframe in old sort
+    #get df for specified year
+    currYear <- get(paste0("race_df_", y, sep = ""))
+    #year = by row in new sort; use year count as row count in new sort
+    #traverse by columns = races in both 
+    for(z in 1:length(races)){
+      new_df[year_count, z] <- currYear[row_index, z]
+    }
+    year_count <- year_count + 1
+  }
+  rownames(new_df) <- c(1994:2002)
+  colnames(new_df) <- races
+  new_df
+}
+
+for(i in 1994:2002){
+  prefix <- "race_df_"
+  file_name <- paste0("../data/",prefix, i, "_cleaned.Rdata", sep = "")
+  df_name <- paste0(prefix, i, sep = "")
+  load(file_name)
+  assign(df_name, df)
+}
+
+####Sort data by individual item: rows = years, columns = races
+races <- c("White", "Black", "Hispanic", "NonHispanic")
+row_indices <- c(Income = 1, Expenditure = 2, 
+                 Food = 3, Alcohol = 4, Apparel = 5,
+                 Housing = 6, Transportation = 7, Health = 8, 
+                 Entertainment = 9, Reading = 11, Miscellaneous = 14,
+                 PersonalInsurance = 16)
+
+#make dfs, then split by race
+
+for(i in 1:length(row_indices)){
+  df <- as.data.frame(matrix(data = 0, nrow = 9, ncol = 4))
+  df <- get_info(row_index = row_indices[i], df)
+  #make individual vectors: spending data for years by race
+  for(j in 1:length(races)){
+    vec <- df[j]
+    #make & assign name to vec
+    name <- paste0(races[j], "_", names(row_indices[i]), sep = "")
+    assign(name, vec)
+  }
+}
+
+
+
+plot.new()
+years_expenditure <- c(1994:2002)
+plot(years_expenditure, t(White_Expenditure), 
+     xlab = "Year", main = "Average Annual Expenditure", 
+     ylab = "Expenditure ($)", xaxt = 'n', lwd = 3, 
+     yaxt = 'n', type = "l", col = "#FF7256", axes = FALSE, 
+     ylim= c(15000,60000), xlim = c(1994, 2002))
+lines(years_expenditure, t(Black_Expenditure), 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#76EEC6")
+lines(years_expenditure, t(Hispanic_Expenditure), 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#0000EE")
+lines(years_expenditure, t(`NonHispanic_Expenditure`), 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#BCEE68")
+axis(side = 2, at = c(seq(from = 15000, to = 60000, by = 5000)), las = 1, cex.axis = 0.75)
+axis(side = 1, at = c(seq(from = 1994, to = 2002, by = 2)), las = 1)
+abline(h = c(seq(from=15000,to=60000,by=5000)), v = c(seq(from = 1994, to = 2002, by = 2)))
+legend("topleft", title = "Subgroups", 
+       col = c("#FF7256", "#BCEE68", "#0000EE", "#76EEC6"), 
+       legend = c("White", "Non-Hispanic", "Hispanic", "Black"), 
+       lwd = c(2.5, 2.5), lty = c(1,1), cex = 0.7)
+```
+
+The trends in this graph mimic our findings in annual income. While every demographic's annual spending increases, they all do so at a similar rate. The difference between demographic groups' annual expenditures in 2002 appears to be the same as in 1994. With some individual differences, most visibly in 1999 and 2001, the trends appear to be stable: minorities' expenditures are increasing, but at no different rate than whites' or other minorities', despite discrepancies in homeownership and incomes.
+
+**Composition of Spending:**
+
+We wanted to further examine expenditure by analyzing its composition. Are certain groups spending more on certain goods— ie. Food— than on other goods? How has this trend changed overtime? We began our analysis by first segmenting our various categories of goods— Food, Alcoholic Beverages, Housing, Apparel & Services, Transportation, Healthcare, Entertainment, Personal Care Products & Services, Reading, Education, Tobacco Products & Smoking Supplies, Miscellaneous Foods, Cash Contributions, Personal Insurance & Pensions— into "essential" and "nonessential" goods. This would help us further understand if there is perhaps a faster rate of spending increase in nonessential goods rather than essential goods, or if there is a shift in spending away from essential goods to nonessentials. In this case, there could potentially be an increase in the purchasing power. For our essential categories we chose Healthcare, Food, Transportation, Apparel, Personal Care Products, and Personal Insurance and for our non-essential goods we examined Entertainment, Reading, Miscellaneous Foods, and Alcoholic Beverages.
+
+```{r, echo=FALSE}
+food_1994 <- sum(race_df_1994[3,])
+apparel_1994 <- sum(race_df_1994[6,])
+transportation_1994 <- sum(race_df_1994[7,])
+healthcare_1994 <- sum(race_df_1994[8,])
+entertainment_1994 <- sum(race_df_1994[9,])
+personalcare_1994 <- sum(race_df_1994[10,])
+
+# spending pie chart for 1994
+slices_1994 <- c(food_1994,apparel_1994,transportation_1994,
+                 healthcare_1994,entertainment_1994,personalcare_1994)
+labels_1994 <- c("Food","Apparel","Transportation","Healthcare",
+                 "Entertainment","Personal Care")
+pct <- round(slices_1994/sum(slices_1994)*100)
+labels_1994 <- paste(labels_1994, pct) # add percents to labels 
+labels_1994 <- paste(labels_1994,"%",sep="") # ad % to labels 
+pie_1994 <- pie(slices_1994, labels = labels_1994, 
+                main = "Categorical Spending for 1994")
+
+# sum of food, apparel, transportation, health care, 
+# entertainment, personal care products for 2002 (all races)
+food_2002 <- sum(race_df_2002[3,])
+apparel_2002 <- sum(race_df_2002[6,])
+transportation_2002 <- sum(race_df_2002[7,])
+healthcare_2002 <- sum(race_df_2002[8,])
+entertainment_2002 <- sum(race_df_2002[9,])
+personalcare_2002 <- sum(race_df_2002[10,])
+
+#pie chart 2002
+slices_2002 <- c(food_2002,apparel_2002,transportation_2002,
+                 healthcare_2002,entertainment_2002,personalcare_2002)
+labels_2002 <- c("Food","Apparel","Transportation","Healthcare",
+                 "Entertainment","Personal Care")
+pct <- round(slices_2002/sum(slices_2002)*100)
+labels_2002 <- paste(labels_2002, pct) # add percents to labels 
+labels_2002 <- paste(labels_2002,"%",sep="") # ad % to labels 
+pie_2002 <- pie(slices_2002, labels = labels_2002, 
+                main = "Categorical Spending for 2002")
+
+
+#Pie chart by minority
+food_white_1994 <- race_df_1994[3,1]
+apparel_white_1994 <- race_df_1994[6,1]
+transportation_white_1994 <- race_df_1994[7,1]
+healthcare_white_1994 <- race_df_1994[8,1]
+entertainment_white_1994 <- race_df_1994[9,1]
+personalcare_white_1994 <- race_df_1994[10,1]
+
+slices_white_1994 <- c(food_white_1994,apparel_white_1994,
+                       transportation_white_1994,healthcare_white_1994,
+                       entertainment_white_1994,personalcare_white_1994)
+labels_white_1994 <- c("Food","Apparel","Transportation","Healthcare",
+                       "Entertainment","Personal Care")
+pct_white_1994 <- round(slices_white_1994/sum(slices_white_1994)*100)
+# add percents to labels
+labels_white_1994 <- paste(labels_white_1994, pct_white_1994)  
+labels_white_1994 <- paste(labels_white_1994,"%",sep="")  
+pie_white_1994 <- pie(slices_white_1994, labels = labels_white_1994, 
+                      main = "White - Categorical Spending for 1994")
+
+food_black_1994 <- race_df_1994[3,2]
+apparel_black_1994 <- race_df_1994[6,2]
+transportation_black_1994 <- race_df_1994[7,2]
+healthcare_black_1994 <- race_df_1994[8,2]
+entertainment_black_1994 <- race_df_1994[9,2]
+personalcare_black_1994 <- race_df_1994[10,2]
+
+slices_black_1994 <- c(food_black_1994, apparel_black_1994,
+                       transportation_black_1994, healthcare_black_1994, 
+                       entertainment_black_1994, personalcare_black_1994)
+labels_black_1994 <- c("Food","Apparel","Transportation","Healthcare",
+                       "Entertainment","Personal Care")
+pct_black_1994 <- round(slices_black_1994/sum(slices_black_1994)*100)
+# add percents to labels
+labels_black_1994 <- paste(labels_black_1994, pct_black_1994)  
+labels_black_1994 <- paste(labels_black_1994,"%",sep="")  
+pie_black_1994 <- pie(slices_black_1994, labels = labels_black_1994, 
+                      main = "Black - Categorical Spending for 1994")
+
+slices_hispanic_1994 <- c(race_df_1994$Hispanic[3],race_df_1995$Hispanic[6],
+                          race_df_1995$Hispanic[7],race_df_1995$Hispanic[8],
+                          race_df_1995$Hispanic[9],race_df_1995$Hispanic[10])
+labels_hispanic_1994 <- c("Food","Apparel","Transportation",
+                          "Healthcare","Entertainment","Personal Care")
+pct_hispanic_1994 <- round(slices_hispanic_1994/sum(slices_hispanic_1994)*100)
+labels_hispanic_1994 <- paste(labels_hispanic_1994, pct_hispanic_1994)
+labels_hispanic_1994 <- paste(labels_hispanic_1994, "%", sep = "")
+pie_hispanic_1994 <- pie(slices_hispanic_1994, labels = labels_hispanic_1994, 
+                         main = "Hispanic - Categorical Spending for 1994")
+
+#Pie charts by minority for 2002
+slices_white_2002 <- c(race_df_2002$`White`[3],
+                       race_df_2002$`White`[6],
+                       race_df_2002$`White`[7],
+                       race_df_2002$`White`[8],
+                       race_df_2002$`White`[9],
+                       race_df_2002$`White`[10])
+labels_white_2002 <- c("Food","Apparel","Transportation","Healthcare",
+                       "Entertainment","Personal Care")
+pct_white_2002 <- round(slices_white_2002/sum(slices_white_2002)*100)
+labels_white_2002 <- paste(labels_white_2002, pct_white_2002)
+labels_white_2002 <- paste(labels_white_2002, "%", sep = "")
+pie_white_2002 <- pie(slices_white_2002, labels = labels_white_2002, 
+                      main = "White - Categorical Spending for 2002")
+
+slices_black_2002 <- c(race_df_2002$Black[3],race_df_2002$Black[6],
+                       race_df_2002$Black[7],race_df_2002$Black[8],
+                       race_df_2002$Black[9],race_df_2002$Black[10])
+labels_black_2002 <- c("Food","Apparel","Transportation","Healthcare",
+                       "Entertainment","Personal Care")
+pct_black_2002 <- round(slices_black_2002/sum(slices_black_2002)*100)
+labels_black_2002 <- paste(labels_black_2002, pct_black_2002)
+labels_black_2002 <- paste(labels_black_2002, "%", sep = "")
+pie_black_2002 <- pie(slices_black_2002, labels = labels_black_2002, 
+                      main = "Black - Categorical Spending for 2002")
+
+slices_hispanic_2002 <- c(race_df_2002$Hispanic[3], race_df_2002$Hispanic[6], 
+                          race_df_2002$Hispanic[7], race_df_2002$Hispanic[8], 
+                          race_df_2002$Hispanic[9], race_df_2002$Hispanic[10])
+labels_hispanic_2002 <- c("Food","Apparel","Transportation","Healthcare",
+                          "Entertainment","Personal Care")
+pct_hispanic_2002 <- round(slices_hispanic_2002/sum(slices_hispanic_2002)*100)
+labels_hispanic_2002 <- paste(labels_hispanic_2002, pct_hispanic_2002)
+labels_hispanic_2002 <- paste(labels_hispanic_2002, "%", sep = "")
+pie_hispanic_2002 <- pie(slices_hispanic_2002, labels = labels_hispanic_2002, 
+                         main = "Hispanic - Categorical Spending for 2002")
+
+#create vectors of essential spending 
+#(Food, Transportation, Apparel, Health Care, Personal Insurance) by race
+total_essential_white <- White_Food + White_Transportation + 
+  White_Apparel + White_Health + 
+  White_PersonalInsurance
+total_essential_black <- Black_Food + Black_Transportation + 
+  Black_Apparel + Black_Health + 
+  Black_PersonalInsurance
+total_essential_hispanic <- Hispanic_Food + Hispanic_Transportation + 
+  Hispanic_Apparel + Hispanic_Health + 
+  Hispanic_PersonalInsurance
+total_essential_nonhispanic <- NonHispanic_Food + NonHispanic_Transportation +
+  NonHispanic_Apparel + NonHispanic_Health + 
+  NonHispanic_PersonalInsurance
+
+#create vectors of non essential spending 
+#(Alcoholic Beverages, Reading, Entertainment, Miscellaneous Foods) by race
+total_non_essential_white <- White_Alcohol + White_Reading + 
+  White_Entertainment + White_Miscellaneous
+total_non_essential_black <- Black_Alcohol + Black_Reading + 
+  Black_Entertainment + Black_Miscellaneous
+total_non_essential_hispanic <- Hispanic_Alcohol + Hispanic_Reading + 
+  Hispanic_Entertainment + Hispanic_Miscellaneous
+total_non_essential_nonhispanic <- NonHispanic_Alcohol + NonHispanic_Reading + 
+  NonHispanic_Entertainment + 
+  NonHispanic_Miscellaneous
+  
+plot.new()
+years_expenditure <- c(1994:2002)
+plot(years_expenditure, total_essential_white$White, 
+     xlab = "Year", main = "Essential Goods", 
+     ylab = "Expenditure ($)", xaxt = 'n', lwd = 3, yaxt = 'n', 
+     type = "l", col = "#FF7256", axes = FALSE, ylim= c(10000,25000), 
+     xlim = c(1994, 2002))
+lines(years_expenditure, total_essential_black$Black, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#76EEC6")
+total_essential_black
+lines(years_expenditure, total_essential_hispanic$Hispanic, xaxt = 'n', 
+      yaxt = 'n', lwd = 3, col = "#0000EE")
+lines(years_expenditure, total_essential_nonhispanic$NonHispanic, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#BCEE68")
+axis(side = 2, at = c(seq(from = 10000, to = 25000, by = 2500)), 
+     las = 1, cex.axis = 0.75)
+axis(side = 1, at = c(seq(from = 1994, to = 2002, by = 2)), las = 1)
+abline(h = c(seq(from=10000,to=25000,by=2500)), 
+       v = c(seq(from = 1994, to = 2002, by = 2)))
+legend("topleft", title = "Subgroups", 
+       col = c("#FF7256", "#BCEE68", "#0000EE", "#76EEC6"), 
+       legend = c("White", "Non-Hispanic", "Hispanic", "Black"), 
+       lwd = c(2.5, 2.5), lty = c(1,1), cex = 0.7)
+
+plot.new()
+years_expenditure <- c(1994:2002)
+plot(years_expenditure, total_non_essential_white$White, 
+     xlab = "Year", main = "Nonessential Goods", 
+     ylab = "Expenditure ($)", xaxt = 'n', lwd = 3, yaxt = 'n', 
+     type = "l", col = "#FF7256", axes = FALSE,
+     ylim= c(1000,5000), xlim = c(1994, 2002))
+lines(years_expenditure, total_non_essential_black$Black, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#76EEC6")
+lines(years_expenditure, total_non_essential_hispanic$Hispanic, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#0000EE")
+lines(years_expenditure, total_non_essential_nonhispanic$NonHispanic, 
+      xaxt = 'n', yaxt = 'n', lwd = 3, col = "#BCEE68")
+axis(side = 2, at = c(seq(from = 1000, to = 5000, by = 500)), 
+     las = 1, cex.axis = 0.75)
+axis(side = 1, at = c(seq(from = 1994, to = 2002, by = 2)), 
+     las = 1)
+abline(h = c(seq(from=0,to=5000,by=500)), 
+       v = c(seq(from = 1994, to = 2002, by = 2)))
+legend("topleft", title = "Subgroups", 
+       col = c("#FF7256", "#BCEE68", "#0000EE", "#76EEC6"), 
+       legend = c("White", "Non-Hispanic", "Hispanic", "Black"), 
+       lwd = c(2.5, 2.5), lty = c(1,1), cex = 0.7)
+```
+
+As we can see in the plots above, there is a general increase in spending by all groups on both essential and nonessential categories, with the expenditure trends for White and Non-Hispanic closely following each other. It is interesting to note, however, that in 1999, there was a marginal spike in spending on essential goods for the Hispanic and Black population. Rather than observing the minimal increase in spending on nonessential goods by minority groups, there were no noticeable changes in the trends.
+
+We also wanted to further understand the breakdown of these spending patterns of minority groups on essential and nonessential goods. To do this, we specifically examined select categories of goods for 1994 and 2002 to test if there was a difference in composition.
+
+```{r, echo=FALSE}
+labels_black_1994 <- paste(labels_black_1994, pct_black_1994)  
+labels_black_1994 <- paste(labels_black_1994,"%",sep="")  
+pie_black_1994 <- pie(slices_black_1994, labels = labels_black_1994, 
+                      main = "Black - Categorical Spending for 1994")
+
+slices_black_2002 <- c(race_df_2002$Black[3],race_df_2002$Black[6],
+                       race_df_2002$Black[7],race_df_2002$Black[8],
+                       race_df_2002$Black[9],race_df_2002$Black[10])
+labels_black_2002 <- c("Food","Apparel","Transportation","Healthcare",
+                       "Entertainment","Personal Care")
+pct_black_2002 <- round(slices_black_2002/sum(slices_black_2002)*100)
+labels_black_2002 <- paste(labels_black_2002, pct_black_2002)
+labels_black_2002 <- paste(labels_black_2002, "%", sep = "")
+pie_black_2002 <- pie(slices_black_2002, labels = labels_black_2002, 
+                      main = "Black - Categorical Spending for 2002")
+```
+
+BLS found that for black households in the 8 years we analyzed, relative yearly health care spending increased, as did entertainment spending. Transportation retained the same large percentage of yearly expenditure--over a third of total yearly spending--as did the smallest piece of the pie, personal care spending. Apparel and food, however, was marginally lower 8 years later, and therefore both accounted for less of yearly spending over the years.
+
+```{r, echo=FALSE}
+pct_hispanic_1994 <- round(slices_hispanic_1994/sum(slices_hispanic_1994)*100)
+labels_hispanic_1994 <- paste(labels_hispanic_1994, pct_hispanic_1994)
+labels_hispanic_1994 <- paste(labels_hispanic_1994, "%", sep = "")
+pie_hispanic_1994 <- pie(slices_hispanic_1994, labels = labels_hispanic_1994, 
+                         main = "Hispanic - Categorical Spending for 1994")
+
+pct_hispanic_2002 <- round(slices_hispanic_2002/sum(slices_hispanic_2002)*100)
+labels_hispanic_2002 <- paste(labels_hispanic_2002, pct_hispanic_2002)
+labels_hispanic_2002 <- paste(labels_hispanic_2002, "%", sep = "")
+pie_hispanic_2002 <- pie(slices_hispanic_2002, labels = labels_hispanic_2002, 
+                         main = "Hispanic - Categorical Spending for 2002")
+```
+
+From 1994 to 2002, the data suggest Hispanic families spent more of their income on transportation, and less on food. The proportion of their spending on apparel, entertainment, healthcare, and personal care appear to be the same from the two reference years.
+
+Black and Hispanic families are spending less on transportation, apparel, and healthcare. They spend roughly the same percentage of their income on personal care and entertainment, and often spend more of their money on food. These patterns are shared by both groups, as compared to both white family units as well as the total population average. Without more thorough data, it would be foolish speculation to suggest any causal mechanisms or answers behind these trends--but these trends are a good place to start asking questions.
+
+**Conclusion:**
+
+To learn more about the average spending of minority groups in the United States, we graphed data from the US Census Bureau and the Bureau of Labor Statistics. We decided to focus our analysis on the decade from 1994 to 2002 since those were the years that overlapped between the data from the two sources. We found that, with a few exceptions, there is nothing new under the sun. All demographics' rates of home ownerships are steadily decreasing, as of 2005. This predates the housing bubble by a few years--in the years following the recession (from which many argue we are still recovering), do these rates begin to increase again? But apart from this turn in 2005, incomes and expenditures all increase steadily, across all demographics. The main categories of expenditures and their relative distribution are similar across the whole population. Things in 2002 seem to be continuing just as they have been--and this also includes inequality. Black homeownership maintains its low rate as compared to the national average, and white incomes and expenditures are consistently higher than minorities'. White families' homeownership rates, average annual income, and average annual spending are all consistently higher than all specified minority groups, have been since 1994, and do not show signs of stopping as of 2002. We can conclude that while things have been fairly consistent since 1994, they are not equal. A significant and constant gap between minorities and whites in homeownership, average annual income, and average annual expenditure persists from 1994 to the present.
